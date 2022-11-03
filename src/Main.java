@@ -1,5 +1,9 @@
+import java.time.Month;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        DiaryInterface diaryInterface = new DiaryInterface();
+        diaryInterface.start();
+
     }
 }
