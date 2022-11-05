@@ -1,19 +1,20 @@
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class ServiceTask {
+public class ServiceTask<T extends Task> {
     private final Map<Integer, Task> listTasks = new HashMap<>();
 
     public void createTask() {
         Scanner scan = new Scanner(System.in);
 
         System.out.print("Введите заголовок: ");
-        String name = scan.useDelimiter("\n").next();
+        String name = scan.nextLine();
 
         System.out.print("Введите описание: ");
-        String description = scan.useDelimiter("\n").next();
+        String description = scan.nextLine();
 
         Task.Type type = null;
         while (type == null) {
@@ -24,15 +25,16 @@ public class ServiceTask {
             int answerType = scan.nextInt();
             switch (answerType) {
                 case 1:
-                    type = Task.Type.ЛИЧНАЯ;
+                    type = Task.Type.PERSONAL;
                     break;
                 case 2:
-                    type = Task.Type.РАБОЧАЯ;
+                    type = Task.Type.WORKING;
                     break;
                 default:
                     System.out.println("Такого типа задачи не существует!");
             }
         }
+
         LocalDateTime dateTime;
         while (true) {
             System.out.print("Установите дату и время в формате (год-месяц-день час:минуты): ");
@@ -57,19 +59,19 @@ public class ServiceTask {
             int answerRepeat = scan.nextInt();
             switch (answerRepeat) {
                 case 1:
-                    repeat = Task.Repeat.ОДНОКРАТНАЯ;
+                    repeat = Task.Repeat.ONE_TIME;
                     break;
                 case 2:
-                    repeat = Task.Repeat.ЕЖЕДНЕВНАЯ;
+                    repeat = Task.Repeat.DAILY;
                     break;
                 case 3:
-                    repeat = Task.Repeat.ЕЖЕНЕДЕЛЬНАЯ;
+                    repeat = Task.Repeat.WEEKLY;
                     break;
                 case 4:
-                    repeat = Task.Repeat.ЕЖЕМЕСЯЧНАЯ;
+                    repeat = Task.Repeat.MONTHLY;
                     break;
                 case 5:
-                    repeat = Task.Repeat.ЕЖЕГОДНАЯ;
+                    repeat = Task.Repeat.ANNUAL;
                     break;
                 default:
                     System.out.println("Нет такой повторяемости");
@@ -82,6 +84,9 @@ public class ServiceTask {
         addListTasks(task);
     }
 
+    public void addListTasks(Task task) {
+        listTasks.put(task.getId(), task);
+    }
     public void editTask() {
         Scanner scan = new Scanner(System.in);
         mark:
@@ -95,11 +100,11 @@ public class ServiceTask {
                         System.out.println(current);
 
                         System.out.print("Введите новый заголовок: ");
-                        String name = scan.useDelimiter("\n").next();
+                        String name = scan.nextLine();
                         current.setName(name);
 
                         System.out.print("Введите новое описание: ");
-                        String description = scan.useDelimiter("\n").next();
+                        String description = scan.nextLine();
                         current.setDescription(description);
 
                         System.out.println("Задача отредактирована");
@@ -144,55 +149,55 @@ public class ServiceTask {
         }
     }
 
-    public void addListTasks(Task task) {
-        listTasks.put(task.getId(), task);
-        Task.Repeat repeat = task.getRepeat();
-        switch (repeat) {
-            case ЕЖЕДНЕВНАЯ:
-                for (int i = 0; i <= LocalDateTime.now().getDayOfYear(); i++) {
-                    Task task1 = new Task(task.getName(), task.getDescription(), task.getType(), task.getDate(),
-                            task.getRepeat());
-                    listTasks.put(task1.getId(), task1);
-                    task.setDate(task1.getDate().plusDays(1));
-                    System.out.println("Следующее повторение задачи будет " + task1.getDate());
-                }
-                break;
-            case ЕЖЕНЕДЕЛЬНАЯ:
-                for (int i = 0; i <= 52; i++) {
-                    Task task1 = new Task(task.getName(), task.getDescription(), task.getType(), task.getDate(),
-                            task.getRepeat());
-                    listTasks.put(task1.getId(), task1);
-                    task.setDate(task1.getDate().plusWeeks(1));
-                    System.out.println("Следующее повторение задачи будет: " + task1.getDate());
-                }
-                break;
-            case ЕЖЕМЕСЯЧНАЯ:
-                for (int i = 0; i <= 12; i++) {
-                    Task task1 = new Task(task.getName(), task.getDescription(), task.getType(), task.getDate(),
-                            task.getRepeat());
-                    listTasks.put(task1.getId(), task1);
-                    task.setDate(task1.getDate().plusMonths(1));
-                    System.out.println("Следующее повторение задачи будет " + task1.getDate());
-                }
-                break;
-            case ЕЖЕГОДНАЯ:
-                for (int i = 0; i <= 5; i++) {
-                    Task task1 = new Task(task.getName(), task.getDescription(), task.getType(), task.getDate(),
-                            task.getRepeat());
-                    listTasks.put(task1.getId(), task1);
-                    task.setDate(task1.getDate().plusYears(1));
-                    System.out.println("Следующее повторение задачи будет " + task1.getDate());
-                }
-                break;
-        }
+    public boolean appearsIn(LocalDate localDate, Task task) {
+            Task.Repeat repeat = task.getRepeat();
+            switch (repeat) {
+                case ONE_TIME:
+                    if (localDate.equals
+                            (LocalDate.parse(task.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))) {
+                        return true;
+                    }
+                    break;
+
+                case DAILY:
+                    if (localDate.isBefore(ChronoLocalDate.from(task.getDate()))) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+
+                case WEEKLY:
+                    if (Objects.equals(localDate.getDayOfWeek(), task.getDate().getDayOfWeek())) {
+                        return true;
+                    }
+                    break;
+
+                case MONTHLY:
+                    if (Objects.equals(localDate.getMonth(), task.getDate().getMonth())) {
+                        return true;
+                    }
+                    break;
+
+                case ANNUAL:
+                    if (Objects.equals(localDate.getDayOfWeek(), task.getDate().getDayOfWeek()) &&
+                            Objects.equals(localDate.getMonth(), task.getDate().getMonth())) {
+                        return true;
+                    }
+                    break;
+
+                default:
+                    return false;
+            }
+        return false;
     }
+
 
     public void getTasksForDay() {
         Scanner scan = new Scanner(System.in);
         LocalDate date;
         while (true) {
             System.out.print("Введите дату в формате (год-месяц-день): ");
-            String answerDate = scan.useDelimiter("\n").next();
+            String answerDate = scan.nextLine();
             if (answerDate.matches("[12]0[0-9][0-9]\\-[01][0-9]\\-[0-3][0-9]")) {
                 date = LocalDate.parse(answerDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 break;
@@ -201,9 +206,11 @@ public class ServiceTask {
             }
         }
         System.out.println("Задачи на " + date + ":");
+        System.out.println("Задачи на сегодня:");
         for (Task current : listTasks.values()) {
-            if (date.equals(LocalDate.parse(current.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), DateTimeFormatter.ofPattern("yyyy-MM-dd")))) {
+            while (appearsIn(date, current)) {
                 System.out.println(current);
+                break;
             }
         }
     }
@@ -211,9 +218,9 @@ public class ServiceTask {
     public void getTasksToday() {
         System.out.println("Задачи на сегодня:");
         for (Task current : listTasks.values()) {
-            if (LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                    .equals(current.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))) {
+            while (appearsIn(LocalDate.now(), current)) {
                 System.out.println(current);
+                break;
             }
         }
     }
@@ -221,9 +228,9 @@ public class ServiceTask {
     public void getTasksTomorrow() {
         System.out.println("Задачи на завтра:");
         for (Task current : listTasks.values()) {
-            if (LocalDateTime.now().plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                    .equals(current.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))) {
+            while (appearsIn(LocalDate.now().plusDays(1), current)) {
                 System.out.println(current);
+                break;
             }
         }
     }

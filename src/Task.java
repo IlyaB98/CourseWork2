@@ -2,43 +2,47 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
-
-    public boolean isRemote() {
-        return remote;
-    }
-
-    public void setRemote(boolean remote) {
-        this.remote = remote;
-    }
-
     public enum Type {
-        ЛИЧНАЯ,
-        РАБОЧАЯ
+        PERSONAL,
+        WORKING
     }
 
     public enum Repeat {
-        ОДНОКРАТНАЯ,
-        ЕЖЕДНЕВНАЯ,
-        ЕЖЕНЕДЕЛЬНАЯ,
-        ЕЖЕМЕСЯЧНАЯ,
-        ЕЖЕГОДНАЯ
+        ONE_TIME,
+        DAILY,
+        WEEKLY,
+        MONTHLY,
+        ANNUAL
     }
 
     private String name;
     private String description;
-    private Type type;
+    private final Type type;
     private LocalDateTime date;
-    private Repeat repeat;
+    private final Repeat repeat;
     private static int currentId;
-    private int id;
+    private final int id;
     private boolean remote;
 
     public Task(String name, String description, Type type, LocalDateTime date, Repeat repeat) {
+
         setName(name);
         setDescription(description);
-        setType(type);
+
+        if (type == null) {
+            throw new IllegalArgumentException("Некоректные данные задачи в поле ТИП");
+        } else {
+            this.type = type;
+        }
+
         this.date = date;
-        setRepeat(repeat);
+
+        if (repeat == null) {
+            throw new IllegalArgumentException("Некоректные данные задачи в поле ПОВТОРЯЕМОСТЬ");
+        } else {
+            this.repeat = repeat;
+        }
+
         this.id = ++currentId;
         remote = false;
     }
@@ -69,40 +73,33 @@ public class Task {
         return type;
     }
 
-    public void setType(Type type) {
-        if (type == null) {
-            throw new IllegalArgumentException("Некоректные данные задачи в поле ТИП");
-        }
-        this.type = type;
-    }
-
     public LocalDateTime getDate() {
         return date;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
     }
 
     public Repeat getRepeat() {
         return repeat;
     }
 
-    public void setRepeat(Repeat repeat) {
-        if (repeat == null) {
-            throw new IllegalArgumentException("Некоректные данные задачи в поле ПОВТОРЯЕМОСТЬ");
-        }
-        this.repeat = repeat;
-    }
-
     public int getId() {
         return id;
     }
 
+    public boolean isRemote() {
+        return remote;
+    }
+
+    public void setRemote(boolean remote) {
+        this.remote = remote;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
 
     @Override
     public String toString() {
-        return "Задача: " + getName() + ", описание: " + getDescription().toLowerCase() +
+        return getName() + ", описание: " + getDescription().toLowerCase() +
                 ", планируемая дата: " + getDate() + ", тип задачи - " + getType().toString().toLowerCase() +
                 ", повторяемость - " + getRepeat().toString().toLowerCase() + ", id - " + getId() +
                 ", удаленная задача - " + isRemote();
@@ -113,7 +110,7 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return id == task.id && name.equals(task.name) && description.equals(task.description) && type == task.type && date.equals(task.date) && repeat == task.repeat;
+        return name.equals(task.name) && description.equals(task.description) && type == task.type && date.equals(task.date) && repeat == task.repeat;
     }
 
     @Override
