@@ -18,7 +18,7 @@ public class Task {
     private String name;
     private String description;
     private final Type type;
-    private LocalDateTime date;
+    private final LocalDateTime date;
     private final Repeat repeat;
     private static int currentId;
     private final int id;
@@ -91,10 +91,6 @@ public class Task {
 
     public void setRemote(boolean remote) {
         this.remote = remote;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
     }
 
     @Override

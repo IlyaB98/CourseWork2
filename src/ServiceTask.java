@@ -1,7 +1,7 @@
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.*;
 
 public class ServiceTask<T extends Task> {
@@ -100,11 +100,11 @@ public class ServiceTask<T extends Task> {
                         System.out.println(current);
 
                         System.out.print("Введите новый заголовок: ");
-                        String name = scan.nextLine();
+                        String name = scan.useDelimiter("\n").next();
                         current.setName(name);
 
                         System.out.print("Введите новое описание: ");
-                        String description = scan.nextLine();
+                        String description = scan.useDelimiter("\n").next();
                         current.setDescription(description);
 
                         System.out.println("Задача отредактирована");
@@ -153,34 +153,39 @@ public class ServiceTask<T extends Task> {
             Task.Repeat repeat = task.getRepeat();
             switch (repeat) {
                 case ONE_TIME:
-                    if (localDate.equals
-                            (LocalDate.parse(task.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))) {
+                    if (localDate.equals(task.getDate().toLocalDate())) {
                         return true;
                     }
                     break;
 
                 case DAILY:
-                    if (localDate.isBefore(ChronoLocalDate.from(task.getDate()))) {
+                    if (localDate.isBefore(task.getDate().toLocalDate())) {
                         return false;
                     } else {
                         return true;
                     }
 
                 case WEEKLY:
-                    if (Objects.equals(localDate.getDayOfWeek(), task.getDate().getDayOfWeek())) {
+                    if (Objects.equals(localDate.getDayOfWeek(), task.getDate().getDayOfWeek()) &&
+                            localDate.isAfter(task.getDate().toLocalDate()) ||
+                            localDate.isEqual(task.getDate().toLocalDate())) {
                         return true;
                     }
                     break;
 
                 case MONTHLY:
-                    if (Objects.equals(localDate.getMonth(), task.getDate().getMonth())) {
+                    if (Objects.equals(localDate.get(ChronoField.DAY_OF_MONTH), task.getDate().get(ChronoField.DAY_OF_MONTH)) &&
+                            localDate.isAfter(task.getDate().toLocalDate()) ||
+                            localDate.isEqual(task.getDate().toLocalDate())) {
                         return true;
                     }
                     break;
 
                 case ANNUAL:
-                    if (Objects.equals(localDate.getDayOfWeek(), task.getDate().getDayOfWeek()) &&
-                            Objects.equals(localDate.getMonth(), task.getDate().getMonth())) {
+                    if (Objects.equals(localDate.get(ChronoField.DAY_OF_MONTH), task.getDate().get(ChronoField.DAY_OF_MONTH)) &&
+                            Objects.equals(localDate.getMonth(), task.getDate().getMonth()) &&
+                            localDate.isAfter(task.getDate().toLocalDate()) ||
+                            localDate.isEqual(task.getDate().toLocalDate())) {
                         return true;
                     }
                     break;
@@ -206,10 +211,10 @@ public class ServiceTask<T extends Task> {
             }
         }
         System.out.println("Задачи на " + date + ":");
-        System.out.println("Задачи на сегодня:");
         for (Task current : listTasks.values()) {
             while (appearsIn(date, current)) {
-                System.out.println(current);
+                System.out.println(current.getName() + " " + current.getDescription() + " " + current.getType() +
+                        " " + date);
                 break;
             }
         }
@@ -219,7 +224,8 @@ public class ServiceTask<T extends Task> {
         System.out.println("Задачи на сегодня:");
         for (Task current : listTasks.values()) {
             while (appearsIn(LocalDate.now(), current)) {
-                System.out.println(current);
+                System.out.println(current.getName() + " " + current.getDescription() + " " + current.getType() +
+                        " " + LocalDate.now());
                 break;
             }
         }
@@ -229,7 +235,8 @@ public class ServiceTask<T extends Task> {
         System.out.println("Задачи на завтра:");
         for (Task current : listTasks.values()) {
             while (appearsIn(LocalDate.now().plusDays(1), current)) {
-                System.out.println(current);
+                System.out.println(current.getName() + " " + current.getDescription() + " " + current.getType() +
+                        " " + LocalDate.now().plusDays(1));
                 break;
             }
         }
