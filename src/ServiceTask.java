@@ -212,10 +212,9 @@ public class ServiceTask<T extends Task> {
         }
         System.out.println("Задачи на " + date + ":");
         for (Task current : listTasks.values()) {
-            while (appearsIn(date, current)) {
+            if (appearsIn(date, current)) {
                 System.out.println(current.getName() + " " + current.getDescription() + " " + current.getType() +
                         " " + date);
-                break;
             }
         }
     }
@@ -223,10 +222,9 @@ public class ServiceTask<T extends Task> {
     public void getTasksToday() {
         System.out.println("Задачи на сегодня:");
         for (Task current : listTasks.values()) {
-            while (appearsIn(LocalDate.now(), current)) {
+            if (appearsIn(LocalDate.now(), current)) {
                 System.out.println(current.getName() + " " + current.getDescription() + " " + current.getType() +
                         " " + LocalDate.now());
-                break;
             }
         }
     }
@@ -234,10 +232,9 @@ public class ServiceTask<T extends Task> {
     public void getTasksTomorrow() {
         System.out.println("Задачи на завтра:");
         for (Task current : listTasks.values()) {
-            while (appearsIn(LocalDate.now().plusDays(1), current)) {
+            if (appearsIn(LocalDate.now().plusDays(1), current)) {
                 System.out.println(current.getName() + " " + current.getDescription() + " " + current.getType() +
                         " " + LocalDate.now().plusDays(1));
-                break;
             }
         }
     }
